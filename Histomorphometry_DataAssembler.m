@@ -24,6 +24,17 @@ if ispc
     dl = '\';
 end
 
+%Is this Bone Morphometry or Midshaft?
+pathname = foldername;
+midshaft = 0;
+fileID = [pathname dl theseFiles(1).name];
+check = findstr(fileID, 'MIDSHAFT');
+if ~isempty(check)
+    midshaft = 1;
+    %These are midshaft files - Need to be doctored
+end
+
+
 %% Write Document 
 pathname = foldername;
 
@@ -33,6 +44,16 @@ sizeA = [75 2];
 file = cell(1,length(theseFiles));
 for i = 1:length(theseFiles)
     fileID = [pathname dl theseFiles(i).name];
+    if midshaft
+       fid = fopen(fileID);
+       ogtext = fscanf(fid, '%c');
+       test_strrep = strrep(ogtext, [' '], ['']);
+       fclose(fid);
+       delete(fileID);
+       fid = fopen(fileID,'w');
+       fprintf(fid, test_strrep);
+       fclose(fid);
+    end
     file{i} = tdfread(fileID);
 end
 
